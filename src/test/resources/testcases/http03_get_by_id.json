@@ -1,0 +1,2 @@
+{"request": {"method": "GET", "url": "/products/abc", "headers": {}, "body": {}}, "response": {"status_code": 400}}
+{"request": {"method": "GET", "url": "/products/999", "headers": {}, "body": {}}, "response": {"status_code": 404}}

@@ -6,6 +6,7 @@ import io.github.bucket4j.Refill;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitingFilter implements Filter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final int capacity;
+    private final int tokensPerMinute;
 
-    private Bucket createNewBucket() {
-        Bandwidth limit = Bandwidth.classic(10, Refill.greedy(10, Duration.ofMinutes(1)));
-        return Bucket.builder()
-                .addLimit(limit)
-                .build();
+    public RateLimitingFilter(
+            @Value("${rate.limit.capacity:100}") int capacity,
+            @Value("${rate.limit.tokens:100}") int tokensPerMinute) {
+        this.capacity = capacity;
+        this.tokensPerMinute = tokensPerMinute;
     }
 
     @Override
@@ -40,12 +43,32 @@ public class RateLimitingFilter implements Filter {
             if (bucket.tryConsume(1)) {
                 chain.doFilter(request, response);
             } else {
-                httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                httpResponse.setContentType("application/json");
-                httpResponse.getWriter().write("{ \"error\": \"Too many requests. Please try again later.\" }");
+                sendRateLimitError(httpResponse);
             }
         } else {
             chain.doFilter(request, response);
         }
+    }
+
+    private Bucket createNewBucket() {
+        return Bucket.builder()
+                .addLimit(Bandwidth.classic(capacity, Refill.greedy(tokensPerMinute, Duration.ofMinutes(1))))
+                .build();
+    }
+
+    private void sendRateLimitError(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType("application/json");
+
+        long timestamp = java.time.Instant.now().toEpochMilli();
+        String json = String.format("""
+                {
+                    "status": 429,
+                    "message": "Rate limit exceeded. Try again in a minute.",
+                    "timestamp": %d
+                }
+                """, timestamp);
+
+        response.getWriter().write(json);
     }
 }

@@ -12,7 +12,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "rate.limit.capacity=10",    // Capacidad exacta para el bucle
+        "rate.limit.tokens=10"
+})
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class SecurityIntegrationTest {
@@ -30,6 +33,6 @@ class SecurityIntegrationTest {
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.error").value("Too many requests. Please try again later."));
+                .andExpect(jsonPath("$.error").value("Too many requests"));
     }
 }

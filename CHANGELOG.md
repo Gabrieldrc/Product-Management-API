@@ -1,3 +1,7 @@
+¡Claro! Aquí tienes el comando cat para que simplemente lo pegues en tu terminal y se actualice el archivo CHANGELOG.md con la nueva versión 0.4.0 y los pendientes para la 0.5.0.
+
+Bash
+cat << 'EOF' > CHANGELOG.md
 # CHANGELOG
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
@@ -8,8 +12,23 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Integración de OpenAPI/Swagger para documentación de contratos (v0.5.0).
 - Capacidad de filtrado dinámico por condición y título en `GET /products` (En planificación).
-- Integración de OpenAPI/Swagger para documentación de contratos.
+
+## [0.4.0] - 2026-01-19
+
+### Added
+- **Aislamiento de Base de Datos:** Implementación de `resetDatabaseState()` con SQL nativo (`TRUNCATE RESTART IDENTITY`) para garantizar que cada archivo de prueba dinámico inicie con IDs limpios.
+- **Resiliencia Multi-Entorno:** Soporte en el motor de tests para nombres de tablas tanto en plural (`products`) como en singular (`product`), evitando fallos por estrategias de nombrado de Hibernate.
+- **Consistencia de Errores:** Alineación del formato JSON de error del `RateLimitingFilter` con el `GlobalExceptionHandler`, incluyendo el campo `timestamp`.
+
+### Changed
+- **Arquitectura de Filtros:** Refactorización del `RateLimitingFilter` para utilizar un formato de respuesta manual pero idéntico al DTO `ErrorResponse`, asegurando que las respuestas 429 sigan el estándar de la API.
+- **Optimización de Tests:** Inyección directa de `EntityManager` en el motor dinámico para mejorar el rendimiento de la limpieza de tablas.
+
+### Fixed
+- **SQLGrammarException:** Corregido el error de "Table PRODUCT not found" que bloqueaba la ejecución de tests dinámicos en entornos H2 estrictos.
+- **ID Mismatch:** Eliminada la deriva de IDs entre ejecuciones de archivos JSON mediante el reinicio forzado de secuencias de identidad.
 
 ## [0.3.0] - 2026-01-19
 
@@ -53,7 +72,7 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Estructura de DTOs utilizando Java Records (`ProductRequest` y `ProductResponse`).
 - `GlobalExceptionHandler` centralizado para gestión de errores 404 y 400.
 
-[Unreleased](https://github.com/Gabrieldrc/example/compare/0.3.0...HEAD)
+[0.4.0](https://github.com/Gabrieldrc/example/compare/0.3.0...0.4.0)
 [0.3.0](https://github.com/Gabrieldrc/example/compare/0.2.0...0.3.0)
 [0.2.0](https://github.com/Gabrieldrc/example/compare/0.1.0...0.2.0)
 [0.1.0](https://github.com/Gabrieldrc/example/releases/tag/v0.1.0)

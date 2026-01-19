@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackerrank.sample.repository.ProductRepository;
 import com.hackerrank.sample.security.RateLimitingFilter;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class HttpJsonDynamicUnitTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final MediaType CONTENT_TYPE_JSON = MediaType.APPLICATION_JSON;
@@ -46,8 +47,10 @@ public class HttpJsonDynamicUnitTest {
     @Autowired
     private ProductRepository productRepository;
 
-    private MockMvc mockMvc;
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager; // Inyectado directamente
 
+    private MockMvc mockMvc;
     private final Map<String, String> httpJsonAndTestname = new HashMap<>();
     private final Map<String, Long> executionTime = new HashMap<>();
     private final Map<String, FailureInfo> testFailures = new HashMap<>();
@@ -58,13 +61,13 @@ public class HttpJsonDynamicUnitTest {
 
     @BeforeEach
     public void setup() {
-        productRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .addFilters(rateLimitingFilter)
                 .build();
     }
 
     @Test
+    @Transactional
     public void dynamicTests() throws IOException {
         long startTime = System.currentTimeMillis();
         Path testcasesDir = Paths.get("src/test/resources/testcases");
@@ -81,6 +84,8 @@ public class HttpJsonDynamicUnitTest {
         AtomicInteger processedRequestCount = new AtomicInteger(1);
 
         for (String filename : httpJsonFiles) {
+            resetDatabaseState(); // Lógica de limpieza encapsulada
+
             List<String> jsonLines = loadFileLines("testcases/" + filename);
             long fileStartTime = System.currentTimeMillis();
 
@@ -91,20 +96,38 @@ public class HttpJsonDynamicUnitTest {
                 try {
                     processJsonLine(filename, cleanLine, processedRequestCount);
                 } catch (Exception e) {
-                    // Ahora usamos los 5 parámetros correctamente
                     addTestFailure(filename, "System Error", "Execution of " + filename, "Success", e.getMessage());
                     break;
                 }
-
                 if (testFailures.containsKey(filename)) break;
             }
             executionTime.put(filename, System.currentTimeMillis() - fileStartTime);
         }
 
         generateConsoleReport(System.currentTimeMillis() - startTime);
-
         if (!testFailures.isEmpty()) {
             fail("Dynamics tests failed. See console failure report.");
+        }
+    }
+
+    /**
+     * Limpia la base de datos y reinicia los contadores de ID para garantizar
+     * consistencia entre diferentes archivos de prueba.
+     */
+    private void resetDatabaseState() {
+        productRepository.deleteAll();
+        productRepository.flush();
+
+        try {
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+            try {
+                entityManager.createNativeQuery("TRUNCATE TABLE products RESTART IDENTITY").executeUpdate();
+            } catch (Exception e) {
+                entityManager.createNativeQuery("TRUNCATE TABLE product RESTART IDENTITY").executeUpdate();
+            }
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Note: ID reset skipped or handled by deleteAll: " + e.getMessage());
         }
     }
 

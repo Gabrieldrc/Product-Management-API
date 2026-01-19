@@ -1,0 +1,4 @@
+{"request": {"method": "POST", "url": "/products", "headers": {"Content-Type": "application/json"}, "body": {"title": "To Delete", "price": 10.0, "stock": 5, "condition": "NEW", "imageUrls": []}}, "response": {"status_code": 201}}
+{"request": {"method": "DELETE", "url": "/products/1", "headers": {}, "body": {}}, "response": {"status_code": 204}}
+{"request": {"method": "DELETE", "url": "/products/1", "headers": {}, "body": {}}, "response": {"status_code": 404}}
+{"request": {"method": "GET", "url": "/products/1", "headers": {}, "body": {}}, "response": {"status_code": 404}}

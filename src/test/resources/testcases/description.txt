@@ -1,2 +1,5 @@
 http00.json: Flujo completo de creación y listado de productos
 http02_errors.json: Pruebas de robustez y validación de campos (Bad Request)
+http03_get_by_id.json: Pruebas de recuperación de productos por ID (Not Found)
+http04_deletion.json: Flujo completo de eliminación e inexistencia
+http05_pagination_logic.json: Validación de parámetros size y page en listado

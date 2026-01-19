@@ -30,7 +30,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Captura errores de validación (@Valid) de forma automática
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationErrors(org.springframework.web.bind.MethodArgumentNotValidException ex) {
@@ -41,6 +40,26 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed: " + errorMsg,
+                Instant.now().toEpochMilli()
+        );
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid parameter: " + ex.getName() + " expects " + ex.getRequiredType().getSimpleName(),
+                Instant.now().toEpochMilli()
+        );
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidJson(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Malformed JSON request or invalid field values (e.g. invalid Enum)",
                 Instant.now().toEpochMilli()
         );
     }
