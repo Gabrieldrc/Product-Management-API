@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    container_name: spring-java21-dev
+    ports:
+      - "8080:8080"
+      - "5006:5005"
+    volumes:
+      - .:/app
+      - maven-cache:/root/.m2
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    stdin_open: true
+    tty: true
+
+volumes:
+  maven-cache:

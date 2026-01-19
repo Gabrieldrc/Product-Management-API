@@ -1,2 +1,2 @@
-http00.json: Get all models
-http01.json: Delete model by id
+http00.json: Flujo completo de creación y listado de productos
+http02_errors.json: Pruebas de robustez y validación de campos (Bad Request)
