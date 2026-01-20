@@ -33,6 +33,7 @@ class SecurityIntegrationTest {
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.error").value("Too many requests"));
+                .andExpect(jsonPath("$.message").value("Rate limit exceeded. Try again in a minute."))
+                .andExpect(jsonPath("$.status").value(429));
     }
 }

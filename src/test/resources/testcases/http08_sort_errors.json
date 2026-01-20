@@ -1,0 +1,1 @@
+{"request": {"method": "GET", "url": "/products?sort=nonexistent,asc", "headers": {}, "body": {}}, "response": {"status_code": 400, "body": {"status": 400, "message": "El campo de ordenamiento 'nonexistent' no existe"}}}

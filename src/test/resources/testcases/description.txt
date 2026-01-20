@@ -3,3 +3,7 @@ http02_errors.json: Pruebas de robustez y validación de campos (Bad Request)
 http03_get_by_id.json: Pruebas de recuperación de productos por ID (Not Found)
 http04_deletion.json: Flujo completo de eliminación e inexistencia
 http05_pagination_logic.json: Validación de parámetros size y page en listado
+http06_advanced_validations.json: Casos de borde para títulos, decimales y listas
+http07_enum_cleaning.json: Validación de condición con mensaje amigable (sin revelar implementación)
+http08_sort_errors.json: Validación de parámetros de ordenamiento dinámico
+http09_update_logic.json: Flujo de actualización y manejo de errores en PUT

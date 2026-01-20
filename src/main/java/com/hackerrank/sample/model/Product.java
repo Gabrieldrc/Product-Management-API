@@ -20,33 +20,32 @@ public class Product implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title cannot be empty")
-    @Size(max = 255)
+    @NotBlank(message = "Title is mandatory and cannot be empty")
+    @Size(max = 100, message = "Title must not exceed 100 characters") // Sincronizado con DTO
+    @Column(length = 100) // Indica a JPA/H2 que el límite físico es 100
     private String title;
 
-    @NotNull(message = "Price is required")
+    @NotNull(message = "Price is mandatory")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
-    @Digits(integer = 12, fraction = 2)
+    @Digits(integer = 12, fraction = 2, message = "Price format must be up to 12 digits and 2 decimals")
     private BigDecimal price;
 
-    @NotNull(message = "Stock level is required")
+    @NotNull(message = "Stock is mandatory")
     @Min(value = 0, message = "Stock cannot be negative")
     private Integer stock;
 
-    @NotNull(message = "Condition is required")
+    @NotNull(message = "Condition is mandatory (NEW or USED)")
     @Enumerated(EnumType.STRING)
     private Condition condition;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
-    private List<String> imageUrls = new ArrayList<>();
+    private List<@NotBlank(message = "Image URL cannot be blank") String> imageUrls = new ArrayList<>();
 
     public enum Condition {
         NEW, USED
     }
-
-    // --- Constructors ---
 
     public Product() {
     }
@@ -60,7 +59,6 @@ public class Product implements Serializable {
     }
 
     // --- Getters & Setters ---
-
     public Long getId() {
         return id;
     }

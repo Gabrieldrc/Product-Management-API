@@ -1,7 +1,3 @@
-¡Claro! Aquí tienes el comando cat para que simplemente lo pegues en tu terminal y se actualice el archivo CHANGELOG.md con la nueva versión 0.4.0 y los pendientes para la 0.5.0.
-
-Bash
-cat << 'EOF' > CHANGELOG.md
 # CHANGELOG
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
@@ -11,67 +7,79 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Planned
+
+- **Full English Localization:** Refactorizar todos los mensajes de error del `GlobalExceptionHandler` y los archivos
+  JSON de prueba al inglés para mantener consistencia global en el contrato.
+- **Dynamic Filtering:** Capacidad de filtrado por categoría y rango de precios.
+
+## [0.5.0] - 2026-01-20
+
 ### Added
-- Integración de OpenAPI/Swagger para documentación de contratos (v0.5.0).
-- Capacidad de filtrado dinámico por condición y título en `GET /products` (En planificación).
+
+- **OpenAPI/Swagger Integration:** Implementación completa de `springdoc-openapi`. Configuración programática del bean
+  `OpenAPI` con metadatos de contacto y soporte.
+- **Advanced Documentation:** Uso de `@Operation`, `@ApiResponses` y `@ExampleObject` en el controlador para mostrar
+  múltiples escenarios de error (400, 404, 429) con ejemplos reales tomados de la suite de pruebas.
+- **Schema Mapping:** Enriquecimiento de Records (`ProductRequest`, `ErrorResponse`) con anotaciones `@Schema` para
+  autogeneración de modelos en la UI de Swagger.
+- **UI Optimization:** Implementación de `@ParameterObject` para limpiar la interfaz de parámetros de paginación en
+  `GET /products`.
+
+### Changed
+
+- **Error Contract Uniformity:** Refactorización del `GlobalExceptionHandler` para que absolutamente todas las
+  excepciones (incluyendo `PropertyReferenceException` y `MethodArgumentTypeMismatchException`) retornen el record
+  `ErrorResponse`.
+- **Anonymization of Internals:** Ajuste de mensajes de error para ocultar detalles de implementación (como nombres de
+  clases Java o Enums) hacia el cliente externo.
 
 ## [0.4.0] - 2026-01-19
 
 ### Added
-- **Aislamiento de Base de Datos:** Implementación de `resetDatabaseState()` con SQL nativo (`TRUNCATE RESTART IDENTITY`) para garantizar que cada archivo de prueba dinámico inicie con IDs limpios.
-- **Resiliencia Multi-Entorno:** Soporte en el motor de tests para nombres de tablas tanto en plural (`products`) como en singular (`product`), evitando fallos por estrategias de nombrado de Hibernate.
-- **Consistencia de Errores:** Alineación del formato JSON de error del `RateLimitingFilter` con el `GlobalExceptionHandler`, incluyendo el campo `timestamp`.
+
+- **Aislamiento de Base de Datos:** Implementación de `resetDatabaseState()` con SQL nativo (
+  `TRUNCATE RESTART IDENTITY`) para garantizar IDs limpios.
+- **Resiliencia Multi-Entorno:** Soporte para nombres de tablas en plural y singular.
+- **Consistencia de Errores:** Alineación del formato JSON de error del `RateLimitingFilter` con el
+  `GlobalExceptionHandler`.
 
 ### Changed
-- **Arquitectura de Filtros:** Refactorización del `RateLimitingFilter` para utilizar un formato de respuesta manual pero idéntico al DTO `ErrorResponse`, asegurando que las respuestas 429 sigan el estándar de la API.
-- **Optimización de Tests:** Inyección directa de `EntityManager` en el motor dinámico para mejorar el rendimiento de la limpieza de tablas.
+
+- **Arquitectura de Filtros:** Refactorización del `RateLimitingFilter` para seguir el estándar del DTO `ErrorResponse`.
+- **Optimización de Tests:** Inyección directa de `EntityManager` para limpieza de tablas.
 
 ### Fixed
-- **SQLGrammarException:** Corregido el error de "Table PRODUCT not found" que bloqueaba la ejecución de tests dinámicos en entornos H2 estrictos.
-- **ID Mismatch:** Eliminada la deriva de IDs entre ejecuciones de archivos JSON mediante el reinicio forzado de secuencias de identidad.
+
+- **SQLGrammarException:** Corregido el error de "Table PRODUCT not found" en entornos H2 estrictos.
+- **ID Mismatch:** Eliminada la deriva de IDs mediante reinicio forzado de secuencias.
 
 ## [0.3.0] - 2026-01-19
 
 ### Added
-- **Paginación Profesional:** Implementación de `PaginatedResponse<T>` (DTO) para limpiar la respuesta de Spring Data y evitar la exposición de metadatos internos.
-- **Control de Entorno:** Añadido `@ActiveProfiles("test")` al motor dinámico para garantizar la independencia de los IDs y desactivar el seeding en pruebas.
-- **Robustez:** Caso de prueba `http02_errors.json` que valida la captura de errores 400 mediante Bean Validation y `GlobalExceptionHandler`.
 
-### Changed
-- **Contratos de API:** El endpoint `GET /products` ahora retorna un objeto JSON estructurado con `content`, `totalElements`, `totalPages`, `pageNumber` y `pageSize`.
-- **Refactor de Seeder:** Actualizada la lógica de `ProductDataSeeder` para trabajar con el nuevo DTO paginado.
-
-### Fixed
-- **Idempotencia de IDs:** Solucionado el problema de desajuste de IDs en los tests dinámicos mediante el aislamiento de perfiles.
+- **Paginación Profesional:** Implementación de `PaginatedResponse<T>` (DTO) para evitar la exposición de metadatos
+  internos de Spring Data.
+- **Control de Entorno:** Añadido `@ActiveProfiles("test")` al motor dinámico.
+- **Robustez:** Caso de prueba `http02_errors.json` para validación de Bean Validation.
 
 ## [0.2.0] - 2026-01-19
 
 ### Added
-- Dependencia de Bucket4j en el pom.xml para el soporte de Rate Limiting.
-- Suite de Tests Unitarios completos para `ProductServiceImpl` cubriendo los 18 casos de prueba de QA.
-- Implementación de Data Seeding mediante `ProductDataSeeder` para entornos de desarrollo.
-- Análisis de estrategia híbrida de testing: Motor Dinámico para regresión y Tests Convencionales para seguridad.
 
-### Changed
-- Refactorización de `ModelController` a `ProductController` con inyección por constructor.
-- Migración de lógica a `ProductServiceImpl` con soporte para Java Records (DTOs).
-- Mejora de seguridad de tipos sustituyendo `Model` por `Product`.
-- Migración completa del motor de tests dinámicos de JUnit 4 a JUnit 5.
-- Sustitución de `javafx.util.Pair` por Java Records internos en el motor de tests.
-
-### Fixed
-- **Estabilidad de Tests:** Añadido `@DirtiesContext` para evitar colisiones por Rate Limit.
-- **Corrección de Motor:** Ajustada la firma de `addTestFailure` para el sistema de reportes.
-- **Robustez de Datos:** Añadido `productRepository.deleteAll()` en el `@BeforeEach`.
+- Dependencia de Bucket4j para Rate Limiting.
+- Suite de Tests Unitarios completos (18 casos de prueba).
+- Implementación de `ProductDataSeeder`.
 
 ## [0.1.0] - 2026-01-19
 
 ### Added
-- Configuración inicial del proyecto con Java 21 y Spring Boot 3.2.5.
-- Modelo de persistencia `Product` con soporte para JPA.
-- Estructura de DTOs utilizando Java Records (`ProductRequest` y `ProductResponse`).
-- `GlobalExceptionHandler` centralizado para gestión de errores 404 y 400.
 
+- Configuración inicial con Java 21 y Spring Boot 3.2.5.
+- Modelo `Product` y estructura inicial de DTOs.
+- `GlobalExceptionHandler` centralizado.
+
+[0.5.0](https://github.com/Gabrieldrc/example/compare/0.4.0...0.5.0)
 [0.4.0](https://github.com/Gabrieldrc/example/compare/0.3.0...0.4.0)
 [0.3.0](https://github.com/Gabrieldrc/example/compare/0.2.0...0.3.0)
 [0.2.0](https://github.com/Gabrieldrc/example/compare/0.1.0...0.2.0)
