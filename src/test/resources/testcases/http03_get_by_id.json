@@ -1,2 +1,2 @@
-{"request": {"method": "GET", "url": "/products/abc", "headers": {}, "body": {}}, "response": {"status_code": 400}}
-{"request": {"method": "GET", "url": "/products/999", "headers": {}, "body": {}}, "response": {"status_code": 404}}
+{"request": {"method": "GET", "url": "/products/abc", "headers": {}, "body": {}}, "response": {"status_code": 400, "body": {"status": 400, "message": "Invalid parameter: 'id' must be a numeric"}}}
+{"request": {"method": "GET", "url": "/products/999", "headers": {}, "body": {}}, "response": {"status_code": 404, "body": {"status": 404, "message": "Product not found with id: 999"}}}

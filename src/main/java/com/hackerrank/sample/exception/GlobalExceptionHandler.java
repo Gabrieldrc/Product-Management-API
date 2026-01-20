@@ -85,11 +85,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({PropertyReferenceException.class, InvalidDataAccessApiUsageException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleSortErrors(Exception ex) {
-        String message = "Error en los parámetros de la consulta";
+        String message = "Invalid query parameters";
         if (ex instanceof PropertyReferenceException) {
-            message = "El campo de ordenamiento '" + ((PropertyReferenceException) ex).getPropertyName() + "' no existe";
+            message = "Sorting field '" + ((PropertyReferenceException) ex).getPropertyName() + "' does not exist";
         } else if (ex.getCause() instanceof PropertyReferenceException) {
-            message = "El campo de ordenamiento '" + ((PropertyReferenceException) ex.getCause()).getPropertyName() + "' no existe";
+            message = "Sorting field '" + ((PropertyReferenceException) ex.getCause()).getPropertyName() + "' does not exist";
         }
 
         return new ErrorResponse(

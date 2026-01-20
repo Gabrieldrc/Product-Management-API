@@ -8,31 +8,24 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Planned
-
-- **Full English Localization:** Refactorizar todos los mensajes de error del `GlobalExceptionHandler` y los archivos
-  JSON de prueba al inglés para mantener consistencia global en el contrato.
 - **Dynamic Filtering:** Capacidad de filtrado por categoría y rango de precios.
+
+## [0.6.0] - 2026-01-20
+
+### Added
+- **Full English Localization:** Refactorización total de mensajes de error en `GlobalExceptionHandler`, DTOs y modelos al inglés técnico.
+- **Global Rate Limit Visibility:** Documentación del error 429 (Too Many Requests) en todos los endpoints del controlador.
+
+### Fixed
+- **Ghost Documentation Fix:** Desactivada la inferencia automática de respuestas de error mediante `springdoc.override-with-generic-response=false`, eliminando respuestas 404 erróneas en endpoints de creación y listado.
+- **Test Consistency:** Actualización de la suite de pruebas JSON para alinearse con los nuevos mensajes de error en inglés.
 
 ## [0.5.0] - 2026-01-20
 
 ### Added
-
-- **OpenAPI/Swagger Integration:** Implementación completa de `springdoc-openapi`. Configuración programática del bean
-  `OpenAPI` con metadatos de contacto y soporte.
-- **Advanced Documentation:** Uso de `@Operation`, `@ApiResponses` y `@ExampleObject` en el controlador para mostrar
-  múltiples escenarios de error (400, 404, 429) con ejemplos reales tomados de la suite de pruebas.
-- **Schema Mapping:** Enriquecimiento de Records (`ProductRequest`, `ErrorResponse`) con anotaciones `@Schema` para
-  autogeneración de modelos en la UI de Swagger.
-- **UI Optimization:** Implementación de `@ParameterObject` para limpiar la interfaz de parámetros de paginación en
-  `GET /products`.
-
-### Changed
-
-- **Error Contract Uniformity:** Refactorización del `GlobalExceptionHandler` para que absolutamente todas las
-  excepciones (incluyendo `PropertyReferenceException` y `MethodArgumentTypeMismatchException`) retornen el record
-  `ErrorResponse`.
-- **Anonymization of Internals:** Ajuste de mensajes de error para ocultar detalles de implementación (como nombres de
-  clases Java o Enums) hacia el cliente externo.
+- **OpenAPI/Swagger Integration:** Implementación de `springdoc-openapi` con metadatos profesionales.
+- **Advanced Documentation:** Uso de `@Operation` y `@ExampleObject` para mostrar múltiples escenarios de error con ejemplos reales.
+- **UI Optimization:** Implementación de `@ParameterObject` para una interfaz de paginación limpia.
 
 ## [0.4.0] - 2026-01-19
 
@@ -79,8 +72,10 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[0.5.0](https://github.com/Gabrieldrc/example/compare/0.4.0...0.5.0)
-[0.4.0](https://github.com/Gabrieldrc/example/compare/0.3.0...0.4.0)
-[0.3.0](https://github.com/Gabrieldrc/example/compare/0.2.0...0.3.0)
-[0.2.0](https://github.com/Gabrieldrc/example/compare/0.1.0...0.2.0)
-[0.1.0](https://github.com/Gabrieldrc/example/releases/tag/v0.1.0)
+[unreleased]: https://github.com/Gabrieldrc/example/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/Gabrieldrc/example/compare/0.5.0...0.6.0
+[0.5.0]: https://github.com/Gabrieldrc/example/compare/0.4.0...0.5.0
+[0.4.0]: https://github.com/Gabrieldrc/example/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/Gabrieldrc/example/compare/0.2.0...0.3.0
+[0.2.0]: https://github.com/Gabrieldrc/example/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/Gabrieldrc/example/releases/tag/v0.1.0
