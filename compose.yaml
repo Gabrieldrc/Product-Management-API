@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: spring-java21-dev
     ports:
       - "8080:8080"
@@ -10,7 +12,8 @@ services:
       - maven-cache:/root/.m2
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - JWT_SECRET_KEY=7f68902513f596a79e70783422079013f99e846059c4378f456860012903730a
+      - JWT_SECRET_KEY=super_secret_key_for_jwt_256_bits_standard
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     stdin_open: true
     tty: true
 

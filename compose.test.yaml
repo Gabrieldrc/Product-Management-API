@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=test

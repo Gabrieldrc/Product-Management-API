@@ -7,6 +7,34 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-01-21
+
+### Added
+
+- **Multi-Stage Docker Architecture:** Implementación de un `Dockerfile` optimizado con etapas diferenciadas para
+  Desarrollo (Hot-reload), Construcción (Maven) y Producción (JRE Alpine).
+- **Advanced Observability:** - Configuración de **Structured Logging** en formato JSON mediante Logback y Logstash
+  Encoder.
+    - Implementación de **Métricas de Negocio** personalizadas con Micrometer (`api.products.created`).
+- **Docker Compose Orchestration:** Creación de entornos segregados (`docker-compose.yaml` para dev y
+  `docker-compose.test.yml` para integración).
+- **Production-Ready Security:** Refuerzo de la entropía de la clave JWT (256 bits) para cumplir con el estándar RFC
+    7518.
+
+### Changed
+
+- **Runtime Optimization:** Migración a imágenes base `eclipse-temurin:21-jre-alpine` reduciendo el tamaño de la imagen
+  final en un 60%.
+- **Container Security:** Implementación de ejecución mediante usuario no-root (`spring:spring`) dentro del contenedor.
+- **Developer Experience:** Configuración de volúmenes para persistencia del `maven-cache` y sincronización de código en
+  tiempo real.
+
+### Fixed
+
+- **WeakKeyException:** Solucionado el error de arranque del contenedor debido a claves JWT de longitud insuficiente.
+- **Docker Path Mismatch:** Corrección de la ejecución del comando `mvn spring-boot:run` para entornos con volúmenes
+  montados.
+
 ## [0.8.0] - 2026-01-21
 
 ### Added
@@ -122,7 +150,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/0.8.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/example/compare/0.9.0...HEAD
+
+[0.9.0]: https://github.com/Gabrieldrc/example/compare/0.8.0...0.9.0
 
 [0.8.0]: https://github.com/Gabrieldrc/example/compare/0.7.0...0.8.0
 
