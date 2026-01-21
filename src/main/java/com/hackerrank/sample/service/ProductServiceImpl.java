@@ -3,39 +3,33 @@ package com.hackerrank.sample.service;
 import com.hackerrank.sample.dto.PaginatedResponse;
 import com.hackerrank.sample.dto.ProductRequest;
 import com.hackerrank.sample.dto.ProductResponse;
-import com.hackerrank.sample.exception.BadResourceRequestException;
 import com.hackerrank.sample.exception.NoSuchResourceFoundException;
 import com.hackerrank.sample.model.Product;
 import com.hackerrank.sample.repository.ProductRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(final ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
     @Override
     @Transactional
-    public ProductResponse createProduct(ProductRequest request) {
-        // En un sistema real, no solemos recibir el ID del cliente al crear.
-        // JPA genera el ID automáticamente.
-        Product product = mapToEntity(request);
-        Product savedProduct = productRepository.save(product);
+    public ProductResponse createProduct(final ProductRequest request) {
+        var product = mapToEntity(request);
+        var savedProduct = productRepository.save(product);
         return mapToResponse(savedProduct);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProductResponse getProductById(Long id) {
+    public ProductResponse getProductById(final Long id) {
         return productRepository.findById(id)
                 .map(this::mapToResponse)
                 .orElseThrow(() -> new NoSuchResourceFoundException("Product with id " + id + " not found"));
@@ -43,8 +37,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
-        Product existingProduct = productRepository.findById(id)
+    public ProductResponse updateProduct(final Long id, final ProductRequest request) {
+        var existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new NoSuchResourceFoundException("Cannot update: Product not found"));
 
         existingProduct.setTitle(request.title());
@@ -58,7 +52,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void deleteProductById(Long id) {
+    public void deleteProductById(final Long id) {
+        // Guard Clause: Check existence before deletion
         if (!productRepository.existsById(id)) {
             throw new NoSuchResourceFoundException("Cannot delete: Product not found");
         }
@@ -66,8 +61,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PaginatedResponse<ProductResponse> getAllProducts(Pageable pageable) {
-        Page<Product> page = productRepository.findAll(pageable);
+    @Transactional(readOnly = true)
+    public PaginatedResponse<ProductResponse> getAllProducts(final Pageable pageable) {
+        var page = productRepository.findAll(pageable);
 
         return new PaginatedResponse<>(
                 page.getContent().stream().map(this::mapToResponse).toList(),
@@ -84,9 +80,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteAllInBatch();
     }
 
-    // --- Mappers Privados ---
-
-    private Product mapToEntity(ProductRequest request) {
+    private Product mapToEntity(final ProductRequest request) {
         return new Product(
                 request.title(),
                 request.price(),
@@ -96,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-    private ProductResponse mapToResponse(Product product) {
+    private ProductResponse mapToResponse(final Product product) {
         return new ProductResponse(
                 product.getId(),
                 product.getTitle(),

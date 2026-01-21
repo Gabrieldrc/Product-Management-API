@@ -10,6 +10,7 @@ services:
       - maven-cache:/root/.m2
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - JWT_SECRET_KEY=7f68902513f596a79e70783422079013f99e846059c4378f456860012903730a
     stdin_open: true
     tty: true
 

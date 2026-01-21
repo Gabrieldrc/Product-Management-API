@@ -3,21 +3,36 @@ package com.hackerrank.sample.service;
 import com.hackerrank.sample.dto.PaginatedResponse;
 import com.hackerrank.sample.dto.ProductRequest;
 import com.hackerrank.sample.dto.ProductResponse;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface ProductService {
-    ProductResponse createProduct(ProductRequest request);
+    /**
+     * Creates a new product and persists it.
+     */
+    ProductResponse createProduct(final ProductRequest request);
 
-    ProductResponse getProductById(Long id);
+    /**
+     * Retrieves a product by its unique identifier.
+     */
+    ProductResponse getProductById(final Long id);
 
-    ProductResponse updateProduct(Long id, ProductRequest request);
+    /**
+     * Updates an existing product's data.
+     */
+    ProductResponse updateProduct(final Long id, final ProductRequest request);
 
-    void deleteProductById(Long id);
+    /**
+     * Removes a product from the system by ID.
+     */
+    void deleteProductById(final Long id);
 
-    PaginatedResponse<ProductResponse> getAllProducts(Pageable pageable);
+    /**
+     * Returns a paginated list of products.
+     */
+    PaginatedResponse<ProductResponse> getAllProducts(final Pageable pageable);
 
+    /**
+     * Deletes all products in a single batch operation.
+     */
     void deleteAllProducts();
 }

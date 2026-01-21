@@ -7,10 +7,31 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Planned
+## [0.8.0] - 2026-01-21
 
-- **Dynamic Filtering:** Capacidad de filtrado por categoría y rango de precios.
-- **Dockerization:** Creación de imagen optimizada para despliegue en contenedores.
+### Added
+
+- **JWT Security Architecture:** Implementación de seguridad sin estado (Stateless) mediante tokens JWT.
+- **Bearer Authentication in Swagger:** Configuración de `SecurityScheme` en OpenAPI 3.0 para permitir pruebas
+  autenticadas desde Swagger UI.
+- **Standardized Error RFC 7807:** Adopción total del estándar internacional `ProblemDetail` para todas las respuestas
+  de error (400, 401, 404, 429).
+- **Type-Safe Configuration:** Implementación de `JwtProperties` utilizando Java Records y `@ConfigurationProperties`.
+
+### Changed
+
+- **Java 21 Refactoring:** Aplicación de estándares modernos: uso de `var`, parámetros `final`, y Records para DTOs e
+  infraestructura.
+- **Unified Exception Handling:** Sincronización de errores de Spring Security y Rate Limiting con el
+  `GlobalExceptionHandler`.
+- **Logic Cleanup:** Implementación de "Guard Clauses" en filtros y servicios para mejorar la legibilidad.
+
+### Fixed
+
+- **Rate Limiting Consistency:** Corrección del formato de salida del `RateLimitingFilter` para alinearse con el esquema
+  global RFC 7807.
+- **Security Integration Tests:** Actualización de las aserciones de `MockMvc` para validar los nuevos paths de JSON (
+  `$.detail` en lugar de `$.message`).
 
 ## [0.7.0] - 2026-01-20
 
@@ -101,7 +122,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/0.7.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/example/compare/0.8.0...HEAD
+
+[0.8.0]: https://github.com/Gabrieldrc/example/compare/0.7.0...0.8.0
 
 [0.7.0]: https://github.com/Gabrieldrc/example/compare/0.6.0...0.7.0
 

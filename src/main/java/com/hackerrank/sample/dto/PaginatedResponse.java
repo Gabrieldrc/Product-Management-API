@@ -4,21 +4,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Envoltorio estándar para respuestas con paginación")
+@Schema(description = "Standard wrapper for paginated API responses")
 public record PaginatedResponse<T>(
-        @Schema(description = "Lista de elementos de la página actual")
+        @Schema(description = "List of items in the current page")
         List<T> content,
 
-        @Schema(description = "Cantidad total de registros existentes en la base de datos", example = "500")
+        @Schema(description = "Total number of records in the database", example = "500")
         long totalElements,
 
-        @Schema(description = "Cantidad total de páginas disponibles según el tamaño solicitado", example = "50")
+        @Schema(description = "Total number of pages based on page size", example = "50")
         int totalPages,
 
-        @Schema(description = "Índice de la página actual (basado en 0)", example = "0")
+        @Schema(description = "Current page index (zero-based)", example = "0")
         int pageNumber,
 
-        @Schema(description = "Cantidad de elementos por página", example = "10")
+        @Schema(description = "Number of elements per page", example = "10")
         int pageSize
 ) {
 }

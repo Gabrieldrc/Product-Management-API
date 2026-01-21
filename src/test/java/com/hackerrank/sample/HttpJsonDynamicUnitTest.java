@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackerrank.sample.repository.ProductRepository;
 import com.hackerrank.sample.security.RateLimitingFilter;
+import com.hackerrank.sample.service.JwtService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
@@ -48,7 +51,10 @@ public class HttpJsonDynamicUnitTest {
     private ProductRepository productRepository;
 
     @Autowired
-    private jakarta.persistence.EntityManager entityManager; // Inyectado directamente
+    private jakarta.persistence.EntityManager entityManager;
+
+    @Autowired
+    private JwtService jwtService;
 
     private MockMvc mockMvc;
     private final Map<String, String> httpJsonAndTestname = new HashMap<>();
@@ -63,6 +69,7 @@ public class HttpJsonDynamicUnitTest {
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .addFilters(rateLimitingFilter)
+                .apply(springSecurity())
                 .build();
     }
 
@@ -144,10 +151,19 @@ public class HttpJsonDynamicUnitTest {
         System.out.println(Colors.BLUE_BOLD + "Processing request " + count.getAndIncrement() + " " + Colors.RESET +
                 Colors.WHITE_BOLD + method + " " + url + Colors.RESET);
 
+        String token = jwtService.generateToken("admin");
+
         ResultActions resultActions = switch (method) {
-            case "POST" -> mockMvc.perform(post(url).content(body).contentType(CONTENT_TYPE_JSON));
-            case "PUT" -> mockMvc.perform(put(url).content(body).contentType(CONTENT_TYPE_JSON));
-            case "DELETE" -> mockMvc.perform(delete(url));
+            case "POST" -> mockMvc.perform(post(url)
+                    .header("Authorization", "Bearer " + token) // <--- TOKEN REAL
+                    .content(body)
+                    .contentType(CONTENT_TYPE_JSON));
+            case "PUT" -> mockMvc.perform(put(url)
+                    .header("Authorization", "Bearer " + token)
+                    .content(body)
+                    .contentType(CONTENT_TYPE_JSON));
+            case "DELETE" -> mockMvc.perform(delete(url)
+                    .header("Authorization", "Bearer " + token));
             default -> mockMvc.perform(get(url));
         };
 

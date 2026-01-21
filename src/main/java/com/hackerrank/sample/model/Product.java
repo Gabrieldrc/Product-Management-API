@@ -20,28 +20,31 @@ public class Product implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is mandatory and cannot be empty")
-    @Size(max = 100, message = "Title must not exceed 100 characters") // Sincronizado con DTO
-    @Column(length = 100) // Indica a JPA/H2 que el límite físico es 100
+    @NotBlank(message = "Title is mandatory")
+    @Size(max = 100)
+    @Column(length = 100, nullable = false)
     private String title;
 
     @NotNull(message = "Price is mandatory")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
-    @Digits(integer = 12, fraction = 2, message = "Price format must be up to 12 digits and 2 decimals")
+    @DecimalMin(value = "0.0", inclusive = false)
+    @Digits(integer = 12, fraction = 2)
+    @Column(nullable = false)
     private BigDecimal price;
 
     @NotNull(message = "Stock is mandatory")
-    @Min(value = 0, message = "Stock cannot be negative")
+    @Min(0)
+    @Column(nullable = false)
     private Integer stock;
 
-    @NotNull(message = "Condition is mandatory (NEW or USED)")
+    @NotNull(message = "Condition is mandatory")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Condition condition;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
-    private List<@NotBlank(message = "Image URL cannot be blank") String> imageUrls = new ArrayList<>();
+    private List<@NotBlank String> imageUrls = new ArrayList<>();
 
     public enum Condition {
         NEW, USED
@@ -50,7 +53,13 @@ public class Product implements Serializable {
     public Product() {
     }
 
-    public Product(String title, BigDecimal price, Integer stock, Condition condition, List<String> imageUrls) {
+    public Product(
+            final String title,
+            final BigDecimal price,
+            final Integer stock,
+            final Condition condition,
+            final List<String> imageUrls
+    ) {
         this.title = title;
         this.price = price;
         this.stock = stock;
@@ -58,12 +67,11 @@ public class Product implements Serializable {
         this.imageUrls = imageUrls;
     }
 
-    // --- Getters & Setters ---
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -71,7 +79,7 @@ public class Product implements Serializable {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -79,7 +87,7 @@ public class Product implements Serializable {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(final BigDecimal price) {
         this.price = price;
     }
 
@@ -87,7 +95,7 @@ public class Product implements Serializable {
         return stock;
     }
 
-    public void setStock(Integer stock) {
+    public void setStock(final Integer stock) {
         this.stock = stock;
     }
 
@@ -95,7 +103,7 @@ public class Product implements Serializable {
         return condition;
     }
 
-    public void setCondition(Condition condition) {
+    public void setCondition(final Condition condition) {
         this.condition = condition;
     }
 
@@ -103,7 +111,7 @@ public class Product implements Serializable {
         return imageUrls;
     }
 
-    public void setImageUrls(List<String> imageUrls) {
+    public void setImageUrls(final List<String> imageUrls) {
         this.imageUrls = imageUrls;
     }
 }

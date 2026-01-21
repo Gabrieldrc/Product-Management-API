@@ -6,24 +6,24 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Schema(description = "Representación detallada de un producto en el catálogo")
+@Schema(description = "Detailed representation of a product in the catalog")
 public record ProductResponse(
-        @Schema(description = "Identificador único generado por el sistema", example = "1025")
+        @Schema(description = "Unique system identifier", example = "1025")
         Long id,
 
-        @Schema(description = "Título del producto", example = "iPhone 15 Pro Max 256GB")
+        @Schema(description = "Product title", example = "iPhone 15 Pro Max")
         String title,
 
-        @Schema(description = "Precio actual de venta", example = "1250.50")
+        @Schema(description = "Current selling price", example = "1250.50")
         BigDecimal price,
 
-        @Schema(description = "Stock remanente", example = "50")
+        @Schema(description = "Remaining stock units", example = "50")
         Integer stock,
 
-        @Schema(description = "Condición de venta", example = "NEW")
+        @Schema(description = "Sale condition", example = "NEW")
         Condition condition,
 
-        @Schema(description = "Galería de imágenes")
+        @Schema(description = "Image gallery")
         List<String> imageUrls
 ) {
 }

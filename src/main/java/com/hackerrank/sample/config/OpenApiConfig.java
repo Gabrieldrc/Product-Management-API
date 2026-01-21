@@ -1,6 +1,8 @@
 package com.hackerrank.sample.config;
 
-import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +16,19 @@ public class OpenApiConfig {
     private String appVersion;
 
     @Bean
-    public OpenAPI productApi() {
+    public OpenAPI customOpenAPI() {
+        final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+                .components(new Components()
+                        .addSecuritySchemes("BearerAuth", new SecurityScheme()
+                                .name("BearerAuth")
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
                 .info(new Info()
-                        .title("Product API Service")
-                        .description("API para la gestión de productos y stock. Incluye control de cuotas por IP.")
+                        .title("Product Management API")
                         .version(appVersion)
-                        .contact(new Contact().name("Support Team").email("api-support@meli.com")));
+                        .description("Secure API with JWT Authentication"));
     }
 }

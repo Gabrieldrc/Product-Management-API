@@ -3,56 +3,63 @@ package com.hackerrank.sample.exception;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles resources not found in the system.
+     */
     @ExceptionHandler(NoSuchResourceFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(NoSuchResourceFoundException ex) {
-        return new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                Instant.now().toEpochMilli()
-        );
+    public ProblemDetail handleNotFound(final NoSuchResourceFoundException ex) {
+        return createProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), "Resource Not Found");
     }
 
+    /**
+     * Handles security exceptions related to invalid or missing tokens.
+     * This ensures we return 401 instead of a generic 403.
+     */
+    @ExceptionHandler(InvalidTokenException.class)
+    public ProblemDetail handleInvalidToken(final InvalidTokenException ex) {
+        return createProblemDetail(HttpStatus.UNAUTHORIZED, ex.getMessage(), "Security Error");
+    }
+
+    /**
+     * Handles generic bad requests for resources.
+     */
     @ExceptionHandler(BadResourceRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(BadResourceRequestException ex) {
-        return new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                Instant.now().toEpochMilli()
-        );
+    public ProblemDetail handleBadRequest(final BadResourceRequestException ex) {
+        return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), "Bad Request");
     }
 
-    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationErrors(org.springframework.web.bind.MethodArgumentNotValidException ex) {
-        String errorMsg = ex.getBindingResult().getFieldErrors().stream()
+    /**
+     * Handles @Valid annotation failures.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
+        final var errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .reduce("", (a, b) -> a + "; " + b);
+                .collect(Collectors.joining("; "));
 
-        return new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation failed: " + errorMsg,
-                Instant.now().toEpochMilli()
-        );
+        return createProblemDetail(HttpStatus.BAD_REQUEST, "Validation failed: " + errors, "Validation Error");
     }
 
-    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
-        String requiredType = "numeric";
+    /**
+     * Handles parameter type mismatches in URLs.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(final MethodArgumentTypeMismatchException ex) {
+        var requiredType = "numeric"; // Standard 1: var used
+
         if (ex.getRequiredType() != null) {
             requiredType = switch (ex.getRequiredType().getSimpleName()) {
                 case "Long", "Integer", "Double" -> "numeric";
@@ -61,55 +68,60 @@ public class GlobalExceptionHandler {
                 default -> ex.getRequiredType().getSimpleName().toLowerCase();
             };
         }
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                String.format("Invalid parameter: '%s' must be a %s", ex.getName(), requiredType),
-                Instant.now().toEpochMilli());
+
+        final var detail = String.format("Invalid parameter: '%s' must be a %s", ex.getName(), requiredType);
+        return createProblemDetail(HttpStatus.BAD_REQUEST, detail, "Type Mismatch");
     }
 
-    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidJson(org.springframework.http.converter.HttpMessageNotReadableException ex) {
-        String message = "Malformed JSON request or invalid field values";
+    /**
+     * Handles malformed JSON or invalid enum values.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleInvalidJson(final HttpMessageNotReadableException ex) {
+        var message = "Malformed JSON request or invalid field values";
 
+        // Guard Clause for specific condition error [Standard 10]
         if (ex.getMessage() != null && ex.getMessage().contains("Condition")) {
             message = "Invalid value for 'condition'. Allowed values are: [NEW, USED]";
         }
 
-        return new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                message,
-                Instant.now().toEpochMilli()
-        );
+        return createProblemDetail(HttpStatus.BAD_REQUEST, message, "Invalid JSON");
     }
 
+    /**
+     * Handles errors related to database sorting fields.
+     */
     @ExceptionHandler({PropertyReferenceException.class, InvalidDataAccessApiUsageException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleSortErrors(Exception ex) {
-        String message = "Invalid query parameters";
-        if (ex instanceof PropertyReferenceException) {
-            message = "Sorting field '" + ((PropertyReferenceException) ex).getPropertyName() + "' does not exist";
-        } else if (ex.getCause() instanceof PropertyReferenceException) {
-            message = "Sorting field '" + ((PropertyReferenceException) ex.getCause()).getPropertyName() + "' does not exist";
+    public ProblemDetail handleSortErrors(final Exception ex) {
+        var message = "Invalid query parameters";
+
+        if (ex instanceof PropertyReferenceException pre) {
+            message = "Sorting field '" + pre.getPropertyName() + "' does not exist";
+        } else if (ex.getCause() instanceof PropertyReferenceException preCause) {
+            message = "Sorting field '" + preCause.getPropertyName() + "' does not exist";
         }
 
-        return new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                message,
-                Instant.now().toEpochMilli()
-        );
+        return createProblemDetail(HttpStatus.BAD_REQUEST, message, "Sorting Error");
     }
 
-    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolation(jakarta.validation.ConstraintViolationException ex) {
-        String message = ex.getConstraintViolations().stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .reduce("", (a, b) -> a + "; " + b);
+    /**
+     * Helper method to standardize ProblemDetail creation.
+     */
+    private ProblemDetail createProblemDetail(final HttpStatus status, final String detail, final String title) {
+        final var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setTitle(title);
+        problemDetail.setProperty("timestamp", Instant.now()); // Standard 9: Instant used
+        return problemDetail;
+    }
 
-        return new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Database constraint violation: " + message,
-                Instant.now().toEpochMilli()
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
+        var problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED,
+                "Token is missing or invalid"
         );
+        problemDetail.setTitle("Unauthorized Access");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
     }
 }
