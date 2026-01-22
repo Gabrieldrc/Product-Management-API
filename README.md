@@ -8,6 +8,7 @@ Microservicio profesional para la gestión de productos, desarrollado con **Java
 
 ### 1. Desarrollo (Modo Hot-Reload & Debug)
 Ejecuta el entorno de desarrollo con volúmenes sincronizados y puerto de debug 5005.
+La aplicación utiliza una base de datos en memoria H2 para simular la persistencia de datos. Los datos iniciales se cargan automáticamente desde `src/main/resources/data.sql` al iniciar la aplicación.
 
 ```bash
 docker compose up --build
@@ -67,6 +68,30 @@ curl http://localhost:8080/actuator/metrics
 
 ---
 
+## 🔍 Item Detail API
+
+El endpoint principal para obtener los detalles de un ítem es el siguiente:
+
+```
+GET /products/{id}
+```
+
+Este endpoint devuelve los detalles completos de un producto, incluyendo su título, precio, stock, condición e URLs de imágenes. La implementación reutiliza la lógica existente en `ProductController` y `ProductService`, asegurando eficiencia y consistencia.
+
+---
+
+## 🏛️ Decisiones Arquitectónicas y Buenas Prácticas
+
+Durante el desarrollo, se han seguido las siguientes decisiones y buenas prácticas:
+
+*   **Persistencia de Datos:** Se utiliza una base de datos en memoria H2 para simular el inventario, lo que permite un entorno de desarrollo rápido y ligero sin necesidad de una base de datos externa. Los datos iniciales se cargan mediante `data.sql`.
+*   **Manejo de Errores:** La API implementa un manejo de errores centralizado utilizando `@RestControllerAdvice` y `ProblemDetail` (RFC 7807), asegurando respuestas de error consistentes y detalladas, como `404 Not Found` para productos no encontrados.
+*   **Documentación:** Se utilizan anotaciones de OpenAPI (`@Tag`, `@Operation`, `@ApiResponses`) y Javadoc para documentar los endpoints y la lógica de negocio, facilitando la comprensión y el uso de la API.
+*   **Testing:** La funcionalidad del API de detalle de ítem está cubierta por los tests unitarios existentes en las capas de controlador y servicio, verificando tanto los casos de éxito como los de error.
+*   **Estándares de Codificación:** Se ha adherido estrictamente a los estándares de codificación definidos en `coding-standards.md`, incluyendo el uso de `records` para DTOs, inyección de dependencias por constructor, uso de `final` para parámetros y variables, y `java.time.Instant` para el manejo de fechas.
+
+---
+
 ## 📂 Requisitos del Sistema
-* Docker & Docker Compose
-* JDK 21 (Solo si corres fuera de Docker)
+*   Docker & Docker Compose
+*   JDK 21 (Solo si corres fuera de Docker)

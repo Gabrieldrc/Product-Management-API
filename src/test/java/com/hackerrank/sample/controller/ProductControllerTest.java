@@ -44,10 +44,10 @@ class ProductControllerTest {
     private ProductService productService;
 
     @Test
-    @DisplayName("UNIT-PC-01: Create product returns 201 Created")
+    @DisplayName("UNIT-PC-01: Create product returns 201 Created with nested info")
     void createProduct_Success() throws Exception {
-        final var request = new ProductRequest("Smart TV", new BigDecimal("499.99"), 5, Condition.NEW, List.of());
-        final var response = new ProductResponse(1L, "Smart TV", new BigDecimal("499.99"), 5, Condition.NEW, List.of());
+        final var request = createFullRequest("Smart TV");
+        final var response = createFullResponse(1L, "Smart TV");
 
         when(productService.createProduct(any(ProductRequest.class))).thenReturn(response);
 
@@ -56,26 +56,30 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.title").value("Smart TV"));
+                .andExpect(jsonPath("$.title").value("Smart TV"))
+                .andExpect(jsonPath("$.seller.name").value("Apple Store"))
+                .andExpect(jsonPath("$.shipping.cost").value(0.00));
     }
 
     @Test
-    @DisplayName("UNIT-PC-02: Get by ID returns 200 OK")
+    @DisplayName("UNIT-PC-02: Get by ID returns 200 OK with nested info")
     void getProductById_Success() throws Exception {
-        final var response = new ProductResponse(10L, "Tablet", new BigDecimal("200.00"), 2, Condition.USED, List.of());
+        final var response = createFullResponse(10L, "Tablet");
 
         when(productService.getProductById(10L)).thenReturn(response);
 
         mockMvc.perform(get("/products/10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Tablet"));
+                .andExpect(jsonPath("$.title").value("Tablet"))
+                .andExpect(jsonPath("$.seller.name").value("Apple Store"))
+                .andExpect(jsonPath("$.shipping.estimatedDelivery").value("Tomorrow"));
     }
 
     @Test
     @DisplayName("UNIT-PC-03: Update product returns 200 OK")
     void updateProduct_Success() throws Exception {
-        final var request = new ProductRequest("Updated Phone", new BigDecimal("800"), 10, Condition.NEW, List.of());
-        final var response = new ProductResponse(1L, "Updated Phone", new BigDecimal("800"), 10, Condition.NEW, List.of());
+        final var request = createFullRequest("Updated Phone");
+        final var response = createFullResponse(1L, "Updated Phone");
 
         when(productService.updateProduct(eq(1L), any(ProductRequest.class))).thenReturn(response);
 
@@ -101,11 +105,8 @@ class ProductControllerTest {
     @DisplayName("UNIT-PC-05: Get all paginated returns 200 OK")
     void getAllProducts_Success() throws Exception {
         final var paginatedResponse = new PaginatedResponse<ProductResponse>(
-                List.of(),
-                0L,
-                0,
-                0,
-                10
+                List.of(createFullResponse(1L, "Product 1")),
+                1L, 1, 0, 10
         );
 
         when(productService.getAllProducts(any(Pageable.class))).thenReturn(paginatedResponse);
@@ -114,8 +115,21 @@ class ProductControllerTest {
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(0))
-                .andExpect(jsonPath("$.pageNumber").value(0));
+                .andExpect(jsonPath("$.content[0].seller.name").value("Apple Store"));
+    }
+
+    private ProductRequest createFullRequest(final String title) {
+        return new ProductRequest(
+                title, "Description", new BigDecimal("499.99"), 5, Condition.NEW, List.of(),
+                "Apple Store", 4.8, BigDecimal.ZERO, "Tomorrow"
+        );
+    }
+
+    private ProductResponse createFullResponse(final Long id, final String title) {
+        return new ProductResponse(
+                id, title, "Description", new BigDecimal("499.99"), 5, Condition.NEW, List.of(),
+                new ProductResponse.SellerInfo("Apple Store", 4.8),
+                new ProductResponse.ShippingInfo(BigDecimal.ZERO, "Tomorrow")
+        );
     }
 }

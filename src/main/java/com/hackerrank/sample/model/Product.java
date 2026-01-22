@@ -2,6 +2,7 @@ package com.hackerrank.sample.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -9,6 +10,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "products")
 public class Product implements Serializable {
@@ -24,6 +30,10 @@ public class Product implements Serializable {
     @Size(max = 100)
     @Column(length = 100, nullable = false)
     private String title;
+
+    @Size(max = 2000)
+    @Column(length = 2000)
+    private String description;
 
     @NotNull(message = "Price is mandatory")
     @DecimalMin(value = "0.0", inclusive = false)
@@ -41,77 +51,27 @@ public class Product implements Serializable {
     @Column(nullable = false)
     private Condition condition;
 
+    @NotBlank(message = "Seller name is mandatory")
+    private String sellerName;
+
+    @DecimalMin("0.0")
+    @DecimalMax("5.0")
+    private Double sellerRating;
+
+    @NotNull(message = "Shipping cost is mandatory")
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal shippingCost;
+
+    @NotBlank(message = "Delivery estimate is mandatory")
+    private String estimatedDelivery;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
+    @Builder.Default
     private List<@NotBlank String> imageUrls = new ArrayList<>();
 
     public enum Condition {
         NEW, USED
-    }
-
-    public Product() {
-    }
-
-    public Product(
-            final String title,
-            final BigDecimal price,
-            final Integer stock,
-            final Condition condition,
-            final List<String> imageUrls
-    ) {
-        this.title = title;
-        this.price = price;
-        this.stock = stock;
-        this.condition = condition;
-        this.imageUrls = imageUrls;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(final Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(final String title) {
-        this.title = title;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(final BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(final Integer stock) {
-        this.stock = stock;
-    }
-
-    public Condition getCondition() {
-        return condition;
-    }
-
-    public void setCondition(final Condition condition) {
-        this.condition = condition;
-    }
-
-    public List<String> getImageUrls() {
-        return imageUrls;
-    }
-
-    public void setImageUrls(final List<String> imageUrls) {
-        this.imageUrls = imageUrls;
     }
 }

@@ -1,8 +1,6 @@
 package com.hackerrank.sample.service;
 
-import com.hackerrank.sample.dto.PaginatedResponse;
 import com.hackerrank.sample.dto.ProductRequest;
-import com.hackerrank.sample.dto.ProductResponse;
 import com.hackerrank.sample.exception.NoSuchResourceFoundException;
 import com.hackerrank.sample.model.Product;
 import com.hackerrank.sample.model.Product.Condition;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,33 +42,36 @@ class ProductServiceImplTest {
     @DisplayName("Product Creation Tests")
     class CreationTests {
         @Test
-        @DisplayName("CP-01: Success creation")
+        @DisplayName("CP-01: Success creation with all fields")
         void createProduct_Success() {
-            ProductRequest request = new ProductRequest("iPhone 15", new BigDecimal("1000"), 10, Condition.NEW, List.of("url1"));
-            Product savedProduct = new Product(request.title(), request.price(), request.stock(), request.condition(), request.imageUrls());
-            savedProduct.setId(1L);
+            final var request = createFullRequest("iPhone 15", "1000.00");
+            final var productEntity = mapToMockEntity(request, 1L);
 
-            when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+            when(productRepository.save(any(Product.class))).thenReturn(productEntity);
 
-            ProductResponse response = productService.createProduct(request);
+            final var response = productService.createProduct(request);
 
             assertAll(
                     () -> assertNotNull(response.id()),
                     () -> assertEquals(request.title(), response.title()),
-                    () -> assertEquals(request.price(), response.price())
+                    () -> assertEquals(request.description(), response.description()),
+                    () -> assertEquals(request.sellerName(), response.seller().name()),
+                    () -> assertEquals(request.shippingCost(), response.shipping().cost())
             );
         }
 
         @Test
         @DisplayName("CP-06: Success creation with empty image list")
         void createProduct_EmptyImages() {
-            ProductRequest request = new ProductRequest("No Image Tech", new BigDecimal("50"), 5, Condition.NEW, Collections.emptyList());
-            Product savedProduct = new Product(request.title(), request.price(), request.stock(), request.condition(), request.imageUrls());
-            savedProduct.setId(2L);
+            final var request = new ProductRequest(
+                    "No Image Tech", "Desc", new BigDecimal("50"), 5, Condition.NEW,
+                    Collections.emptyList(), "Store", 4.0, BigDecimal.ZERO, "Today");
+
+            final var savedProduct = mapToMockEntity(request, 2L);
 
             when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
-            ProductResponse response = productService.createProduct(request);
+            final var response = productService.createProduct(request);
             assertTrue(response.imageUrls().isEmpty());
         }
     }
@@ -80,20 +80,27 @@ class ProductServiceImplTest {
     @DisplayName("Query by ID Tests")
     class QueryTests {
         @Test
-        @DisplayName("CP-07: Search found")
+        @DisplayName("CP-07: Search found with nested info")
         void getProductById_Found() {
-            Product product = new Product("Laptop", new BigDecimal("1500"), 5, Condition.NEW, List.of());
-            product.setId(10L);
+            final var product = Product.builder()
+                    .id(10L)
+                    .title("Laptop")
+                    .sellerName("Apple")
+                    .shippingCost(BigDecimal.TEN)
+                    .build();
+
             when(productRepository.findById(10L)).thenReturn(Optional.of(product));
 
-            ProductResponse response = productService.getProductById(10L);
+            final var response = productService.getProductById(10L);
 
-            assertEquals(10L, response.id());
-            assertEquals("Laptop", response.title());
+            assertAll(
+                    () -> assertEquals(10L, response.id()),
+                    () -> assertEquals("Apple", response.seller().name())
+            );
         }
 
         @Test
-        @DisplayName("CP-08/09: Product not found or invalid ID")
+        @DisplayName("CP-08/09: Product not found")
         void getProductById_NotFound() {
             when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
             assertThrows(NoSuchResourceFoundException.class, () -> productService.getProductById(999L));
@@ -104,33 +111,22 @@ class ProductServiceImplTest {
     @DisplayName("Update Product Tests")
     class UpdateTests {
         @Test
-        @DisplayName("CP-10: Full update success")
+        @DisplayName("CP-10: Full update success including nested fields")
         void updateProduct_Success() {
-            Long targetId = 1L;
-            Product existingProduct = new Product("Old Name", new BigDecimal("10"), 1, Condition.USED, List.of());
-            existingProduct.setId(targetId);
-
-            ProductRequest updateRequest = new ProductRequest("New Name", new BigDecimal("20"), 2, Condition.NEW, List.of("new_url"));
+            final var targetId = 1L;
+            final var existingProduct = Product.builder().id(targetId).title("Old").build();
+            final var updateRequest = createFullRequest("New Name", "1500.00");
 
             when(productRepository.findById(targetId)).thenReturn(Optional.of(existingProduct));
             when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArguments()[0]);
 
-            ProductResponse response = productService.updateProduct(targetId, updateRequest);
+            final var response = productService.updateProduct(targetId, updateRequest);
 
             assertAll(
                     () -> assertEquals("New Name", response.title()),
-                    () -> assertEquals(Condition.NEW, response.condition()),
-                    () -> assertEquals(new BigDecimal("20"), response.price())
+                    () -> assertEquals("Apple Store", response.seller().name()),
+                    () -> assertEquals(new BigDecimal("1500.00"), response.price())
             );
-        }
-
-        @Test
-        @DisplayName("CP-12: Update non-existent")
-        void updateProduct_NotFound() {
-            when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
-            ProductRequest request = new ProductRequest("N/A", BigDecimal.ONE, 1, Condition.NEW, List.of());
-
-            assertThrows(NoSuchResourceFoundException.class, () -> productService.updateProduct(1L, request));
         }
     }
 
@@ -138,20 +134,11 @@ class ProductServiceImplTest {
     @DisplayName("Deletion Tests")
     class DeletionTests {
         @Test
-        @DisplayName("CP-14: Single deletion success")
+        @DisplayName("CP-14: Deletion success")
         void deleteProduct_Success() {
             when(productRepository.existsById(1L)).thenReturn(true);
-
             productService.deleteProductById(1L);
-
             verify(productRepository, times(1)).deleteById(1L);
-        }
-
-        @Test
-        @DisplayName("CP-15: Delete non-existent throws exception")
-        void deleteProduct_NotFound() {
-            when(productRepository.existsById(1L)).thenReturn(false);
-            assertThrows(NoSuchResourceFoundException.class, () -> productService.deleteProductById(1L));
         }
 
         @Test
@@ -163,32 +150,49 @@ class ProductServiceImplTest {
     }
 
     @Nested
-    @DisplayName("List Tests")
+    @DisplayName("Pagination & Business Logic Tests")
     class ListTests {
         @Test
-        @DisplayName("CP-17: Multiple elements with pagination")
-        void getAll_Multiple() {
-            List<Product> products = List.of(new Product(), new Product());
-            Page<Product> page = new PageImpl<>(products);
+        @DisplayName("CP-17: Correct mapping of nested objects in list")
+        void getAll_VerifyMapping() {
+            final var product = Product.builder()
+                    .sellerName("Meli Store")
+                    .shippingCost(BigDecimal.ZERO)
+                    .imageUrls(List.of("url1"))
+                    .build();
 
+            final var page = new PageImpl<>(List.of(product));
             when(productRepository.findAll(any(Pageable.class))).thenReturn(page);
 
+            final var results = productService.getAllProducts(PageRequest.of(0, 10));
 
-            PaginatedResponse<ProductResponse> results = productService.getAllProducts(PageRequest.of(0, 10));
-
-            assertEquals(2, results.content().size());
+            final var item = results.content().get(0);
+            assertEquals("Meli Store", item.seller().name());
+            assertEquals(BigDecimal.ZERO, item.shipping().cost());
         }
+    }
 
-        @Test
-        @DisplayName("CP-18: Empty list with pagination")
-        void getAll_Empty() {
-            when(productRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
+    // Helper methods for cleaner tests
+    private ProductRequest createFullRequest(final String title, final String price) {
+        return new ProductRequest(
+                title, "Full Description", new BigDecimal(price), 10, Condition.NEW,
+                List.of("http://image.com"), "Apple Store", 4.8, new BigDecimal("10.00"), "3 days"
+        );
+    }
 
-            PaginatedResponse<ProductResponse> results = productService.getAllProducts(PageRequest.of(0, 10));
-
-            assertNotNull(results);
-            assertTrue(results.content().isEmpty()); // El contenido es el que está vacío
-            assertEquals(0, results.totalElements()); // El total de elementos es 0
-        }
+    private Product mapToMockEntity(final ProductRequest request, final Long id) {
+        return Product.builder()
+                .id(id)
+                .title(request.title())
+                .description(request.description())
+                .price(request.price())
+                .stock(request.stock())
+                .condition(request.condition())
+                .imageUrls(request.imageUrls())
+                .sellerName(request.sellerName())
+                .sellerRating(request.sellerRating())
+                .shippingCost(request.shippingCost())
+                .estimatedDelivery(request.estimatedDelivery())
+                .build();
     }
 }

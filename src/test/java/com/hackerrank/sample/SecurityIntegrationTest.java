@@ -43,10 +43,15 @@ class SecurityIntegrationTest {
         final var productJson = """
                 {
                     "title": "Unauthorized Product",
+                    "description": "Some description",
                     "price": 100.0,
                     "stock": 10,
                     "condition": "NEW",
-                    "imageUrls": []
+                    "imageUrls": [],
+                    "sellerName": "Apple Store",
+                    "sellerRating": 4.5,
+                    "shippingCost": 0.0,
+                    "estimatedDelivery": "Tomorrow"
                 }
                 """;
 
@@ -71,10 +76,15 @@ class SecurityIntegrationTest {
         final var productJson = """
                 {
                     "title": "Authorized Product",
+                    "description": "Full detailed description",
                     "price": 500.0,
                     "stock": 5,
                     "condition": "NEW",
-                    "imageUrls": ["https://example.com/image.png"]
+                    "imageUrls": ["https://example.com/image.png"],
+                    "sellerName": "Official Store",
+                    "sellerRating": 4.8,
+                    "shippingCost": 15.00,
+                    "estimatedDelivery": "Friday"
                 }
                 """;
 

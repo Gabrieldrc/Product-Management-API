@@ -1,8 +1,6 @@
 package com.hackerrank.sample.service;
 
-import com.hackerrank.sample.dto.PaginatedResponse;
-import com.hackerrank.sample.dto.ProductRequest;
-import com.hackerrank.sample.dto.ProductResponse;
+import com.hackerrank.sample.dto.*;
 import com.hackerrank.sample.exception.NoSuchResourceFoundException;
 import com.hackerrank.sample.model.Product;
 import com.hackerrank.sample.repository.ProductRepository;
@@ -16,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
-
     private final ProductRepository productRepository;
 
     public ProductServiceImpl(final ProductRepository productRepository) {
@@ -27,7 +24,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse createProduct(final ProductRequest request) {
         log.info("Processing product creation: '{}'", request.title());
-        var savedProduct = productRepository.save(mapToEntity(request));
+
+        var product = mapToEntity(request);
+        var savedProduct = productRepository.save(product);
+
         log.info("Product created successfully with ID: {}", savedProduct.getId());
         return mapToResponse(savedProduct);
     }
@@ -36,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getProductById(final Long id) {
         log.debug("Fetching product details for ID: {}", id);
+
         return productRepository.findById(id)
                 .map(this::mapToResponse)
                 .orElseThrow(() -> {
@@ -48,6 +49,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse updateProduct(final Long id, final ProductRequest request) {
         log.info("Updating product ID: {} - New title: '{}'", id, request.title());
+
         var existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Update failed: Product ID {} not found", id);
@@ -55,10 +57,15 @@ public class ProductServiceImpl implements ProductService {
                 });
 
         existingProduct.setTitle(request.title());
+        existingProduct.setDescription(request.description());
         existingProduct.setPrice(request.price());
         existingProduct.setStock(request.stock());
         existingProduct.setCondition(request.condition());
         existingProduct.setImageUrls(request.imageUrls());
+        existingProduct.setSellerName(request.sellerName());
+        existingProduct.setSellerRating(request.sellerRating());
+        existingProduct.setShippingCost(request.shippingCost());
+        existingProduct.setEstimatedDelivery(request.estimatedDelivery());
 
         var updated = productRepository.save(existingProduct);
         log.info("Product ID: {} updated successfully", id);
@@ -69,10 +76,12 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void deleteProductById(final Long id) {
         log.info("Attempting to delete product ID: {}", id);
+
         if (!productRepository.existsById(id)) {
             log.error("Deletion failed: Product ID {} does not exist", id);
             throw new NoSuchResourceFoundException("Cannot delete: Product not found");
         }
+
         productRepository.deleteById(id);
         log.info("Product ID: {} deleted successfully", id);
     }
@@ -81,9 +90,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public PaginatedResponse<ProductResponse> getAllProducts(final Pageable pageable) {
         log.debug("Fetching paginated products. Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        var page = productRepository.findAll(pageable);
 
+        var page = productRepository.findAll(pageable);
         log.info("Retrieved {} products (Total: {})", page.getNumberOfElements(), page.getTotalElements());
+
         return new PaginatedResponse<>(
                 page.getContent().stream().map(this::mapToResponse).toList(),
                 page.getTotalElements(),
@@ -100,23 +110,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product mapToEntity(final ProductRequest request) {
-        return new Product(
-                request.title(),
-                request.price(),
-                request.stock(),
-                request.condition(),
-                request.imageUrls()
-        );
+        return Product.builder()
+                .title(request.title())
+                .description(request.description())
+                .price(request.price())
+                .stock(request.stock())
+                .condition(request.condition())
+                .imageUrls(request.imageUrls())
+                .sellerName(request.sellerName())
+                .sellerRating(request.sellerRating())
+                .shippingCost(request.shippingCost())
+                .estimatedDelivery(request.estimatedDelivery())
+                .build();
     }
 
     private ProductResponse mapToResponse(final Product product) {
         return new ProductResponse(
                 product.getId(),
                 product.getTitle(),
+                product.getDescription(),
                 product.getPrice(),
                 product.getStock(),
                 product.getCondition(),
-                product.getImageUrls()
+                product.getImageUrls(),
+                new ProductResponse.SellerInfo(product.getSellerName(), product.getSellerRating()),
+                new ProductResponse.ShippingInfo(product.getShippingCost(), product.getEstimatedDelivery())
         );
     }
 }

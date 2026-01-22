@@ -7,6 +7,38 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-01-22
+
+### Added
+
+- **Item Detail API Expansion:** Ampliación del modelo `Product` y DTOs para incluir `description`, `seller_info` (name,
+  rating) y `shipping_info` (cost, delivery).
+- **SQL Data Seed Migration:** Implementación de `data.sql` para la carga inicial de datos persistentes, sustituyendo el
+  antiguo `ProductDataSeeder`.
+- **Advanced JSON Assertions:** Actualización de la suite de pruebas `httpXX.json` para validar estructuras anidadas y
+  jerárquicas en las respuestas de la API.
+
+### Changed
+
+- **Java 21 Syntax Refinement:** Aplicación estricta de `final var` para variables locales y parámetros de método en
+  toda la capa de servicio y controladores.
+- **DTO Structural Refactoring:** Migración de `ProductResponse` hacia un diseño de records estáticos anidados para
+  mejorar la cohesión de la información del vendedor y envío.
+- **Database Initialization Flow:** Configuración de `defer-datasource-initialization` para sincronizar la ejecución de
+  scripts SQL con el ciclo de vida de Hibernate.
+
+### Fixed
+
+- **Integration Test Payloads:** Corrección de errores 400 en `SecurityIntegrationTest` mediante la actualización de los
+  cuerpos JSON de prueba con los nuevos campos obligatorios.
+- **Service Layer Visibilidad:** Ajuste de modificadores de acceso en Records para permitir el mapeo correcto entre
+  paquetes de DTO y Servicio.
+
+### Removed
+
+- **Legacy Seeder:** Eliminación de `ProductDataSeeder.java` en favor del estándar `data.sql` basado en archivos de
+  recursos.
+
 ## [0.10.0] - 2026-01-21
 
 ### Added
@@ -175,7 +207,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/0.10.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/example/compare/0.11.0...HEAD
+
+[0.11.0]: https://github.com/Gabrieldrc/example/compare/0.10.0...0.11.0
 
 [0.10.0]: https://github.com/Gabrieldrc/example/compare/0.9.0...0.10.0
 

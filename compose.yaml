@@ -13,6 +13,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - JWT_SECRET_KEY=super_secret_key_for_jwt_256_bits_standard
+      - DB_USER_NAME=dbUseerName
+      - DB_PASSWORD=dbPass123
     command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     stdin_open: true
     tty: true
