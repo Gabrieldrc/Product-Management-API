@@ -5,6 +5,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +21,7 @@ import java.util.Collections;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
 
     public JwtAuthenticationFilter(final JwtService jwtService) {
@@ -35,19 +39,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull final FilterChain filterChain
     ) throws ServletException, IOException {
 
-        var authHeader = request.getHeader("Authorization");
+        final var authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        var token = authHeader.substring(7);
+        final var token = authHeader.substring(7);
 
         try {
-            var username = jwtService.extractUsername(token);
+            final var username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                MDC.put("user", username);
+
                 var authToken = new UsernamePasswordAuthenticationToken(
                         username,
                         null,
@@ -58,8 +64,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
+            log.error("Security Context assignment failed: {}", e.getMessage());
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.clear();
+        }
     }
 }

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for security and token generation")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final JwtService jwtService;
 
@@ -40,9 +44,12 @@ public class AuthController {
     })
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid final LoginRequest request) {
+        log.info("Authentication attempt for user: {}", request.username());
         if (!"admin".equals(request.username()) || !"admin123".equals(request.password())) {
+            log.error("Login failed: Invalid credentials for user '{}'", request.username());
             throw new BadResourceRequestException("Invalid username or password");
         }
+        log.info("Login successful for user: {}", request.username());
 
         var token = jwtService.generateToken(request.username());
 

@@ -7,6 +7,31 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-01-21
+
+### Added
+
+- **Contextual User Logging (MDC):** Implementación de Mapped Diagnostic Context para inyectar automáticamente el nombre
+  del usuario autenticado en cada línea de log.
+- **Strategic Service Logging:** Cobertura total de logs en inglés técnico para el ciclo de vida de productos (Create,
+  Update, Delete, Get, Pagination) siguiendo niveles INFO, DEBUG y WARN.
+- **Smart Log Patterns:** Configuración de un patrón de consola dinámico que muestra `[user]` o `[system]` (fallback)
+  con resaltado de sintaxis en el perfil de desarrollo.
+- **Security Audit Logs:** Registro de intentos de autenticación exitosos y fallidos en el `AuthController` y filtros de
+  seguridad.
+
+### Changed
+
+- **Logback Refactoring:** Actualización de `logback-spring.xml` para soportar tanto logs estructurados JSON para
+  contenedores como logs legibles para humanos en local.
+- **Filter Optimization:** Refactorización del `JwtAuthenticationFilter` mediante métodos privados y Guard Clauses para
+  manejar la limpieza del contexto del hilo (`MDC.clear()`) de forma segura.
+
+### Fixed
+
+- **Thread Context Leak:** Garantizada la limpieza de los datos del usuario en los hilos de ejecución mediante bloques
+  `try-finally` en los filtros, evitando que la información se filtre entre peticiones.
+
 ## [0.9.0] - 2026-01-21
 
 ### Added
@@ -150,7 +175,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/0.9.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/example/compare/0.10.0...HEAD
+
+[0.10.0]: https://github.com/Gabrieldrc/example/compare/0.9.0...0.10.0
 
 [0.9.0]: https://github.com/Gabrieldrc/example/compare/0.8.0...0.9.0
 

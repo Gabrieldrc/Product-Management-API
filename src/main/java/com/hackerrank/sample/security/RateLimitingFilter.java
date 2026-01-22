@@ -6,6 +6,8 @@ import io.github.bucket4j.Refill;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitingFilter implements Filter {
+
+    private static final Logger log = LoggerFactory.getLogger(RateLimitingFilter.class);
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final int capacity;
@@ -59,6 +63,7 @@ public class RateLimitingFilter implements Filter {
             return;
         }
 
+        log.warn("Rate limit triggered for IP: {} on URI: {}", clientIp, requestUri);
         sendRateLimitError(httpResponse);
     }
 
