@@ -11,7 +11,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **Comprehensive API Documentation:** Se agregó y actualizó el archivo `README.md` para incluir una descripción detallada de la API, instrucciones de configuración y ejecución, guía de autenticación, endpoints de monitoreo, documentación interactiva de Swagger UI, y decisiones arquitectónicas clave.
+- **Comprehensive API Documentation:** Se agregó y actualizó el archivo `README.md` para incluir una descripción
+  detallada de la API, instrucciones de configuración y ejecución, guía de autenticación, endpoints de monitoreo,
+  documentación interactiva de Swagger UI, y decisiones arquitectónicas clave.
 
 ## [0.11.0] - 2026-01-22
 
@@ -213,28 +215,28 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/1.0.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/Product-Management-API/compare/1.0.0...HEAD
 
-[1.0.0]: https://github.com/Gabrieldrc/example/compare/0.11.0...1.0.0
+[1.0.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.11.0...1.0.0
 
-[0.11.0]: https://github.com/Gabrieldrc/example/compare/0.10.0...0.11.0
+[0.11.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.10.0...0.11.0
 
-[0.10.0]: https://github.com/Gabrieldrc/example/compare/0.9.0...0.10.0
+[0.10.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.9.0...0.10.0
 
-[0.9.0]: https://github.com/Gabrieldrc/example/compare/0.8.0...0.9.0
+[0.9.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.8.0...0.9.0
 
-[0.8.0]: https://github.com/Gabrieldrc/example/compare/0.7.0...0.8.0
+[0.8.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.7.0...0.8.0
 
-[0.7.0]: https://github.com/Gabrieldrc/example/compare/0.6.0...0.7.0
+[0.7.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.6.0...0.7.0
 
-[0.6.0]: https://github.com/Gabrieldrc/example/compare/0.5.0...0.6.0
+[0.6.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.5.0...0.6.0
 
-[0.5.0]: https://github.com/Gabrieldrc/example/compare/0.4.0...0.5.0
+[0.5.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.4.0...0.5.0
 
-[0.4.0]: https://github.com/Gabrieldrc/example/compare/0.3.0...0.4.0
+[0.4.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.3.0...0.4.0
 
-[0.3.0]: https://github.com/Gabrieldrc/example/compare/0.2.0...0.3.0
+[0.3.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.2.0...0.3.0
 
-[0.2.0]: https://github.com/Gabrieldrc/example/compare/0.1.0...0.2.0
+[0.2.0]: https://github.com/Gabrieldrc/Product-Management-API/compare/0.1.0...0.2.0
 
-[0.1.0]: https://github.com/Gabrieldrc/example/releases/tag/v0.1.0
+[0.1.0]: https://github.com/Gabrieldrc/Product-Management-API/releases/tag/v0.1.0
