@@ -4,25 +4,31 @@ Microservicio profesional para la gestión de productos, desarrollado con **Java
 
 ---
 
-## 🛠️ Instrucciones de Ejecución (Bash)
+## 🛠️ Instrucciones de Ejecución
+
+Este proyecto utiliza Docker y Docker Compose para una configuración y ejecución sencillas.
 
 ### 1. Desarrollo (Modo Hot-Reload & Debug)
-Ejecuta el entorno de desarrollo con volúmenes sincronizados y puerto de debug 5005.
-La aplicación utiliza una base de datos en memoria H2 para simular la persistencia de datos. Los datos iniciales se cargan automáticamente desde `src/main/resources/data.sql` al iniciar la aplicación.
+Para levantar el entorno de desarrollo con recarga en caliente y puerto de depuración 5005, ejecuta:
 
 ```bash
 docker compose up --build
 ```
+La aplicación utiliza una base de datos en memoria H2 para simular la persistencia de datos. Los datos iniciales se cargan automáticamente desde `src/main/resources/data.sql` al iniciar la aplicación.
 
 ### 2. Ejecución de Tests
-Corre la suite completa de pruebas unitarias y de integración.
+Para correr la suite completa de pruebas unitarias y de integración, puedes usar Maven directamente o Docker Compose:
 
 ```bash
+# Ejecutar tests con Maven (requiere JDK 21 instalado localmente)
 mvn test
+
+# Ejecutar tests de integración con Docker Compose
+docker compose -f docker-compose.test.yml up --build
 ```
 
 ### 3. Integración y Producción (Build Optimizado)
-Levanta la versión final empaquetada en una imagen ligera (Alpine) sin herramientas de compilación.
+Para levantar la versión final empaquetada en una imagen ligera (Alpine) sin herramientas de compilación:
 
 ```bash
 docker compose -f docker-compose.test.yml up --build
@@ -32,7 +38,7 @@ docker compose -f docker-compose.test.yml up --build
 
 ## 🔐 Guía de Autenticación Rápida
 
-Para los endpoints protegidos, sigue estos pasos en tu terminal:
+Para interactuar con los endpoints protegidos, sigue estos pasos en tu terminal:
 
 **Paso 1: Login para obtener el Token**
 ```bash
@@ -41,19 +47,32 @@ curl -X POST http://localhost:8080/auth/login \
      -d '{"username": "admin", "password": "admin123"}'
 ```
 
-**Paso 2: Ejemplo de creación de producto (usando el token obtenido)**
+**Paso 2: Ejemplo de uso del Token (por ejemplo, para crear un producto)**
 ```bash
 curl -X POST http://localhost:8080/products \
      -H "Authorization: Bearer <TU_TOKEN_AQUI>" \
      -H "Content-Type: application/json" \
-     -d '{"title":"Nuevo Producto","price":99.99,"stock":10,"condition":"NEW","imageUrls":[]}'
+     -d '{
+       "title": "iPhone 15 Pro Max",
+       "description": "The latest iPhone with titanium body",
+       "price": 1250.5,
+       "stock": 50,
+       "condition": "NEW",
+       "imageUrls": [
+         "https://cdn.example.com/p1.jpg"
+       ],
+       "sellerName": "Apple Official Store",
+       "sellerRating": 4.8,
+       "shippingCost": 15,
+       "estimatedDelivery": "Arrives by Friday"
+     }'
 ```
 
 ---
 
-## 📊 Endpoints de Monitoreo
+## 📊 Endpoints de Monitoreo y Observabilidad
 
-Accede a estos recursos desde tu navegador o mediante `curl`:
+Accede a estos recursos desde tu navegador o mediante `curl` para monitorear el estado y las métricas de la aplicación:
 
 ```bash
 # Verificar salud del sistema
@@ -61,34 +80,39 @@ curl http://localhost:8080/actuator/health
 
 # Ver métricas disponibles
 curl http://localhost:8080/actuator/metrics
-
-# Documentación interactiva (Swagger)
-# URL: http://localhost:8080/swagger-ui/index.html
 ```
 
 ---
 
-## 🔍 Item Detail API
+## 📄 Documentación Interactiva de la API (Swagger UI)
 
-El endpoint principal para obtener los detalles de un ítem es el siguiente:
+La documentación completa y las capacidades de prueba de la API están disponibles a través de Swagger UI. Aquí podrás explorar todos los endpoints, sus modelos de datos, y probar las solicitudes directamente desde tu navegador.
 
-```
-GET /products/{id}
-```
-
-Este endpoint devuelve los detalles completos de un producto, incluyendo su título, precio, stock, condición e URLs de imágenes. La implementación reutiliza la lógica existente en `ProductController` y `ProductService`, asegurando eficiencia y consistencia.
+**URL de Swagger UI:** [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html)
 
 ---
 
 ## 🏛️ Decisiones Arquitectónicas y Buenas Prácticas
 
-Durante el desarrollo, se han seguido las siguientes decisiones y buenas prácticas:
+Durante el desarrollo de este microservicio, se han implementado las siguientes decisiones y buenas prácticas:
 
-*   **Persistencia de Datos:** Se utiliza una base de datos en memoria H2 para simular el inventario, lo que permite un entorno de desarrollo rápido y ligero sin necesidad de una base de datos externa. Los datos iniciales se cargan mediante `data.sql`.
-*   **Manejo de Errores:** La API implementa un manejo de errores centralizado utilizando `@RestControllerAdvice` y `ProblemDetail` (RFC 7807), asegurando respuestas de error consistentes y detalladas, como `404 Not Found` para productos no encontrados.
-*   **Documentación:** Se utilizan anotaciones de OpenAPI (`@Tag`, `@Operation`, `@ApiResponses`) y Javadoc para documentar los endpoints y la lógica de negocio, facilitando la comprensión y el uso de la API.
-*   **Testing:** La funcionalidad del API de detalle de ítem está cubierta por los tests unitarios existentes en las capas de controlador y servicio, verificando tanto los casos de éxito como los de error.
-*   **Estándares de Codificación:** Se ha adherido estrictamente a los estándares de codificación definidos en `coding-standards.md`, incluyendo el uso de `records` para DTOs, inyección de dependencias por constructor, uso de `final` para parámetros y variables, y `java.time.Instant` para el manejo de fechas.
+*   **Tecnologías Base:** Desarrollado con **Java 21** y **Spring Boot 3.2.5**, aprovechando las últimas características de la plataforma.
+*   **Persistencia de Datos:** Se utiliza una base de datos en memoria **H2** para simular el inventario, lo que permite un entorno de desarrollo rápido y ligero. Los datos iniciales se cargan automáticamente mediante [`src/main/resources/data.sql`](src/main/resources/data.sql) al inicio de la aplicación.
+*   **Manejo de Errores:** La API implementa un manejo de errores centralizado utilizando `@RestControllerAdvice` y `ProblemDetail` (RFC 7807), asegurando respuestas de error consistentes y detalladas (e.g., `404 Not Found` para recursos no encontrados).
+*   **Documentación de la API:** Integración con **SpringDoc OpenAPI** para generar automáticamente la documentación interactiva de la API (Swagger UI), accesible en [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html).
+*   **Seguridad:** Implementación de seguridad sin estado (Stateless) mediante **JSON Web Tokens (JWT)**, con autenticación `Bearer` configurada en Swagger UI para facilitar las pruebas.
+*   **Rate Limiting:** Uso de la librería **Bucket4j** para controlar la tasa de solicitudes a la API, protegiendo el servicio contra abusos.
+*   **Observabilidad:**
+    *   **Actuator:** Endpoints de monitoreo (`/health`, `/metrics`, `/info`) para supervisar el estado y las métricas de la aplicación.
+    *   **Structured Logging:** Configuración de **Logback** con **Logstash Encoder** para generar logs estructurados en formato JSON, optimizados para entornos de contenedores.
+*   **Estándares de Codificación:** Adherencia estricta a los estándares de codificación definidos en [`coding-standards.md`](coding-standards.md), incluyendo:
+    *   Uso de `records` para DTOs y configuraciones.
+    *   Inyección de dependencias por constructor.
+    *   Uso de `final` para parámetros y variables locales (`var`).
+    *   Manejo de fechas con `java.time.Instant`.
+    *   Uso de "Guard Clauses" para mejorar la legibilidad.
+    *   Código y comentarios exclusivamente en inglés.
+*   **Testing:** Cobertura de pruebas unitarias y de integración para las capas de controlador y servicio, asegurando la robustez de la API.
 
 ---
 

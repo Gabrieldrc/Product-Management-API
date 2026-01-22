@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 1. [SYNTAX] Use 'var' for local variables when the type is obvious.
-2. [SYNTAX] Use 'records' for DTOs, Configuration, and immutable data holders.
+2. [SYNTAX] Use 'records' for DTOs, Configuration, and immutable dataa holders.
 3. [SYNTAX] Mark all method parameters and class dependencies as 'final'.
 4. [SYNTAX] Use Text Blocks (""" """) for multi-line strings (SQL, JSON, HTML).
 

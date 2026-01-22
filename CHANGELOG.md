@@ -7,6 +7,12 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-01-22
+
+### Added
+
+- **Comprehensive API Documentation:** Se agregó y actualizó el archivo `README.md` para incluir una descripción detallada de la API, instrucciones de configuración y ejecución, guía de autenticación, endpoints de monitoreo, documentación interactiva de Swagger UI, y decisiones arquitectónicas clave.
+
 ## [0.11.0] - 2026-01-22
 
 ### Added
@@ -207,7 +213,9 @@ a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modelo `Product` y estructura inicial de DTOs.
 - `GlobalExceptionHandler` centralizado.
 
-[unreleased]: https://github.com/Gabrieldrc/example/compare/0.11.0...HEAD
+[unreleased]: https://github.com/Gabrieldrc/example/compare/1.0.0...HEAD
+
+[1.0.0]: https://github.com/Gabrieldrc/example/compare/0.11.0...1.0.0
 
 [0.11.0]: https://github.com/Gabrieldrc/example/compare/0.10.0...0.11.0
 
